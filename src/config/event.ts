@@ -127,9 +127,9 @@ export const event = {
   // Leaderboard for the cup stacking game. Setup steps are in the README.
   leaderboard: {
     /** From Supabase: Project Settings > API > Project URL. null = leaderboard switched off. */
-    supabaseUrl: null as string | null,
+    supabaseUrl: "https://uhlehrdvolfyetcilupl.supabase.co" as string | null,
     /** From Supabase: the "publishable" (or "anon") key. NEVER paste the "secret" or "service_role" key here. */
-    supabaseKey: null as string | null,
+    supabaseKey: "sb_publishable_LXg6TBU-uwYA5-Zj_mJ2PA_OFi1u3BU" as string | null,
     /** How many names at the top get to play live at the event. */
     finalists: 5,
     /** e.g. "a $25 gift card". null = "a prize, we'll say what it is soon". */

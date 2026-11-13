@@ -2,7 +2,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { event } from "../config/event";
 import { draw, GAME_SECONDS, H, newGame, rankFor, RANKS, step, tap, W, type Game } from "../game/engine";
 import { countdown } from "../lib/format";
-import { checkName, fetchTop, leaderboardOn, loadName, NAME_MAX, postScore, saveName, type Row } from "../lib/leaderboard";
+import {
+  checkHomeroom,
+  checkName,
+  claimCode,
+  fetchTop,
+  HOMEROOM_MAX,
+  leaderboardOn,
+  loadHomeroom,
+  loadName,
+  NAME_MAX,
+  postScore,
+  saveHomeroom,
+  saveName,
+  type Row,
+} from "../lib/leaderboard";
 import { loadBest, saveBest } from "../lib/share";
 import { Leaderboard, type BoardStatus } from "./Leaderboard";
 import { SectionHead } from "./SectionHead";
@@ -27,7 +41,9 @@ export function TryOne() {
   const [rows, setRows] = useState<Row[]>([]);
   const [boardStatus, setBoardStatus] = useState<BoardStatus>("loading");
   const [name, setName] = useState(loadName);
+  const [homeroom, setHomeroom] = useState(loadHomeroom);
   const [postedAs, setPostedAs] = useState(loadName);
+  const [myCode, setMyCode] = useState("");
   const [post, setPost] = useState<PostState>("idle");
   const [postNote, setPostNote] = useState("");
 
@@ -54,11 +70,19 @@ export function TryOne() {
       setPostNote(check.reason);
       return;
     }
+    const room = checkHomeroom(homeroom);
+    if (room === null) {
+      setPost("error");
+      setPostNote("Homeroom: letters and numbers only, like 12A.");
+      return;
+    }
     setPost("sending");
     setPostNote("");
     try {
-      await postScore(check.name, score);
+      await postScore(check.name, score, room);
       saveName(check.name);
+      saveHomeroom(room);
+      setMyCode(claimCode());
       setPostedAs(check.name);
       setPost("sent");
       setPostNote("Posted.");
@@ -202,12 +226,23 @@ export function TryOne() {
                       disabled={post === "sending" || post === "sent"}
                       onChange={(e) => setName(e.target.value)}
                     />
+                    <input
+                      className="postscore__room"
+                      type="text"
+                      value={homeroom}
+                      maxLength={HOMEROOM_MAX}
+                      autoComplete="off"
+                      placeholder="Homeroom"
+                      aria-label="Homeroom (optional, only organisers see it)"
+                      disabled={post === "sending" || post === "sent"}
+                      onChange={(e) => setHomeroom(e.target.value)}
+                    />
                     <button type="submit" className="btn btn--sm" disabled={post === "sending" || post === "sent"}>
                       {post === "sending" ? "Posting" : post === "sent" ? "Posted" : "Post"}
                     </button>
                   </div>
                   <p className="postscore__note" role="status">
-                    {post === "idle" ? "Use a name your friends know you by. Keep it clean." : postNote}
+                    {post === "idle" ? "Use a name people know you by. Homeroom is optional and only organisers see it." : postNote}
                   </p>
                 </form>
               )}              <div className="arena__actions">
@@ -229,7 +264,7 @@ export function TryOne() {
       </div>
 
       <aside className="ranks" aria-labelledby="board-title">
-        <Leaderboard rows={rows} status={boardStatus} myName={postedAs} />
+        <Leaderboard rows={rows} status={boardStatus} myName={postedAs} myCode={myCode} />
         <details className="ranks__more">
         <summary>Rank titles and scoring</summary>
         <ol className="ranks__list">
@@ -245,8 +280,9 @@ export function TryOne() {
           })}
         </ol>
         <p className="ranks__scoring">
-          10 points for every cup you land. 25 if it's dead centre. 50 more each time you finish a pyramid, and
-          then the next one is bigger and faster. Miss, and your last cup gets knocked off.
+          A cup is worth 10 to 30 points depending on how close to the centre it lands. Every hit in a row makes
+          the next cup worth more. A miss knocks your last cup off and ends the streak. Finishing a pyramid is
+          worth 50, and the next one is bigger, faster, and the cup starts changing direction on you.
         </p>
         </details>
       </aside>

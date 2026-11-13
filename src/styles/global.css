@@ -1317,3 +1317,25 @@ a {
     align-items: start;
   }
 }
+.postscore__row {
+  flex-wrap: wrap;
+}
+.postscore__row input:first-child {
+  flex: 1 1 100%;
+}
+.postscore__room {
+  flex: 1 1 90px;
+}
+.board__code {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fff1b8;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+}
+.board__code strong {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}

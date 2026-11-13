@@ -68,16 +68,72 @@ export async function fetchTop(): Promise<Row[]> {
   return best;
 }
 
-export async function postScore(name: string, score: number): Promise<void> {
+export async function postScore(name: string, score: number, homeroom: string): Promise<void> {
   const res = await fetch(endpoint(), {
     method: "POST",
     headers: { ...headers(), Prefer: "return=minimal" },
-    body: JSON.stringify({ name, score }),
+    body: JSON.stringify({ name, score, homeroom: homeroom || null, claim_code: claimCode() }),
   });
   if (!res.ok) throw new Error(`Leaderboard post failed (${res.status})`);
 }
 
+export const HOMEROOM_MAX = 12;
+
+/** Homeroom is optional and only organisers can see it. Returns null if it isn't usable. */
+export function checkHomeroom(raw: string): string | null {
+  const room = raw.trim().replace(/\s+/g, " ");
+  if (room === "") return "";
+  if (room.length > HOMEROOM_MAX || !/^[A-Za-z0-9 -]+$/.test(room)) return null;
+  const squashed = room.toLowerCase().replace(/[^a-z]/g, "");
+  return BLOCKED.some((w) => squashed.includes(w)) ? null : room;
+}
+
+/*
+ * Claim code: six characters made on this phone and sent privately with every score.
+ * It is never shown on the public board. A finalist proves a score is theirs by showing
+ * the same code on their phone. Letters that look alike (0/O, 1/I) are left out.
+ */
+const CODE_KEY = "cup-stack-claim";
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+let sessionCode = "";
+
+export function claimCode(): string {
+  try {
+    const saved = localStorage.getItem(CODE_KEY);
+    if (saved && /^[A-Z0-9]{6}$/.test(saved)) return saved;
+  } catch {
+    /* fall through to a code that lasts until the tab is closed */
+  }
+  if (!sessionCode) {
+    const bytes = crypto.getRandomValues(new Uint8Array(6));
+    sessionCode = Array.from(bytes, (b) => CODE_CHARS[b % CODE_CHARS.length]).join("");
+  }
+  try {
+    localStorage.setItem(CODE_KEY, sessionCode);
+  } catch {
+    /* storage blocked */
+  }
+  return sessionCode;
+}
+
 const NAME_KEY = "cup-stack-name";
+const ROOM_KEY = "cup-stack-homeroom";
+
+export function loadHomeroom(): string {
+  try {
+    return localStorage.getItem(ROOM_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function saveHomeroom(room: string) {
+  try {
+    localStorage.setItem(ROOM_KEY, room);
+  } catch {
+    /* storage blocked */
+  }
+}
 
 export function loadName(): string {
   try {

@@ -9,9 +9,11 @@ interface Props {
   status: BoardStatus;
   /** The name this visitor posted under, so their row can be marked. */
   myName: string;
+  /** This phone's claim code, once they've posted. */
+  myCode: string;
 }
 
-export function Leaderboard({ rows, status, myName }: Props) {
+export function Leaderboard({ rows, status, myName, myCode }: Props) {
   const { finalists, prize, closes } = event.leaderboard;
   const mine = myName.trim().toLowerCase();
 
@@ -46,6 +48,13 @@ export function Leaderboard({ rows, status, myName }: Props) {
             );
           })}
         </ol>
+      )}
+
+      {myCode && (
+        <p className="board__code">
+          Your claim code is <strong>{myCode}</strong>. Screenshot it. If you make the top {finalists}, we'll ask to see
+          it on this phone.
+        </p>
       )}
     </div>
   );

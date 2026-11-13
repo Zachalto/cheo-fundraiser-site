@@ -45,19 +45,20 @@ For `animation`, pick one of `"cups"`, `"cookie"`, `"pingpong"` or `"balloons"`.
 
 The cup stacking game has a shared leaderboard. People type a name after a round and their score is posted. The top 5 names when it closes play the game live at the event, and the best live score wins the prize. The online board only picks who gets to play live, because scores from a browser game can be faked by someone who knows how.
 
-It is switched off until you connect a free Supabase database:
+It runs on a free Supabase project called `cheo-leaderboard` (Canada region), which is already set up and connected. The address and key in the `leaderboard` part of `src/config/event.ts` are meant to be public. **Never paste the secret / service_role key anywhere in this project.** Fill in `prize` and `closes` in the same place when you know them.
 
-1. Make a free account at [supabase.com](https://supabase.com) and create a new project. Pick the region closest to Ottawa.
-2. In the project, open **SQL Editor**, click **New query**, paste in everything from `supabase/leaderboard.sql`, and click **Run**.
-3. Open **Project Settings > API**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon** key).
-4. Paste both into the `leaderboard` part of `src/config/event.ts`. These two values are meant to be public, so it is fine that they are in the code. **Never paste the secret / service_role key anywhere in this project.**
-5. Fill in `prize` and `closes` in the same place when you know them.
+If you ever need to rebuild it in a new Supabase project: open **SQL Editor**, paste in everything from `supabase/leaderboard.sql`, run it, then copy the **Project URL** and the **publishable** key from **Project Settings > API** into the config.
 
+Knowing who is who:
+
+- Every phone that posts a score gets a six-character **claim code**. The player sees it under the leaderboard; the public never does.
+- Players can also type a **homeroom**. It is optional and private.
+- To check a finalist: Supabase dashboard > Table Editor > `scores`, find their row, and ask them to show the same claim code on their phone. The homeroom column helps you find them before the event.
 Looking after it:
 
 - **Remove a name:** Supabase dashboard > Table Editor > `scores` > tick the row > Delete. There is a bad-word filter, but someone will find a way around it, so check the board now and then.
 - **Close it:** set `supabaseUrl` back to `null` and push. Take a screenshot of the top 5 first.
-- **What it stores:** the name typed, the score, and the time. Nothing else. Tell your teacher the site now stores student-chosen names, since that is a change from "collects nothing".
+- **What it stores:** the name typed, the score, the time, the optional homeroom and the claim code. Nothing else, and nothing about people who only visit. Tell your teacher the site now stores student-chosen names, since that is a change from "collects nothing".
 - Free Supabase projects pause after about a week with no activity. If the board stops loading, open the dashboard and un-pause the project.
 
 ### CHEO logo

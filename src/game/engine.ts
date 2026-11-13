@@ -13,13 +13,23 @@ const CUP_H = 52;
 const SLIDER_Y = 34;
 const FLOOR_Y = H - 22;
 // How close to the outline a drop has to be. Smaller numbers = harder.
-const HIT = CUP_W * 0.34;
-const PERFECT = CUP_W * 0.08;
+const HIT = CUP_W * 0.3;
+const PERFECT = CUP_W * 0.07;
 // How fast the cup slides: at the start, the top speed, and how much it speeds up.
-const START_SPEED = 2.6;
-const MAX_SPEED = 4.4;
+const START_SPEED = 3.0;
+const MAX_SPEED = 4.8;
 const SPEED_PER_CUP = 0.05;
 const SPEED_PER_PYRAMID = 0.3;
+// Points: 10 for barely landing it, up to 30 for dead centre.
+const MIN_POINTS = 10;
+const MAX_POINTS = 30;
+// Every hit in a row adds 15% to the next cup, up to 10 in a row. A miss resets it.
+const STREAK_BONUS = 0.15;
+const STREAK_CAP = 10;
+const PYRAMID_BONUS = 50;
+// From the second pyramid on, the sliding cup sometimes changes direction without warning.
+const FAKE_OUT_MIN = 0.7;
+const FAKE_OUT_MAX = 1.9;
 const MAX_BASE = 5;
 
 const RED = "#d7141a";
@@ -35,6 +45,7 @@ interface Drop {
   y: number;
   slot: number; // index it's falling to, or -1 for a miss
   perfect: boolean;
+  points: number;
   spin: number;
 }
 interface Flash {
@@ -52,6 +63,9 @@ export interface Game {
   next: number;
   phase: number;
   speed: number;
+  dir: 1 | -1;
+  fakeOutIn: number;
+  streak: number;
   drop: Drop | null;
   pause: number;
   flashes: Flash[];
@@ -81,6 +95,9 @@ export function newGame(): Game {
     next: 0,
     phase: Math.PI / 2,
     speed: START_SPEED,
+    dir: 1,
+    fakeOutIn: FAKE_OUT_MAX,
+    streak: 0,
     drop: null,
     pause: 0,
     flashes: [],
@@ -95,12 +112,23 @@ export function tap(g: Game) {
   const x = sliderX(g);
   const target = g.slots[g.next];
   const off = Math.abs(x - target.x);
-  g.drop = { x, y: SLIDER_Y + CUP_H, slot: off <= HIT ? g.next : -1, perfect: off <= PERFECT, spin: 0 };
+  const hit = off <= HIT;
+  const accuracy = hit ? 1 - off / HIT : 0;
+  const base = MIN_POINTS + (MAX_POINTS - MIN_POINTS) * accuracy * accuracy;
+  const points = Math.round(base * (1 + STREAK_BONUS * Math.min(g.streak, STREAK_CAP)));
+  g.drop = { x, y: SLIDER_Y + CUP_H, slot: hit ? g.next : -1, perfect: off <= PERFECT, points, spin: 0 };
 }
 
 /** Advance the game physics by dt seconds. */
 export function step(g: Game, dt: number) {
-  g.phase += g.speed * dt;
+  g.phase += g.dir * g.speed * dt;
+  if (g.base > 3 && !g.drop) {
+    g.fakeOutIn -= dt;
+    if (g.fakeOutIn <= 0) {
+      g.dir = g.dir === 1 ? -1 : 1;
+      g.fakeOutIn = FAKE_OUT_MIN + Math.random() * (FAKE_OUT_MAX - FAKE_OUT_MIN);
+    }
+  }
   g.flashes = g.flashes.filter((f) => (f.life -= dt) > 0);
 
   if (g.pause > 0) {
@@ -122,13 +150,19 @@ export function step(g: Game, dt: number) {
         slot.filled = true;
         g.placed += 1;
         g.next += 1;
-        g.score += d.perfect ? 25 : 10;
+        g.score += d.points;
+        g.streak += 1;
         g.speed = Math.min(MAX_SPEED, g.speed + SPEED_PER_CUP);
         g.phase = Math.random() * Math.PI * 2; // the next cup starts somewhere new, so there's no rhythm to learn
-        g.flashes.push({ text: d.perfect ? "Perfect +25" : "+10", x: slot.x, y: slot.y - CUP_H - 8, life: 0.7 });
+        g.flashes.push({
+          text: (d.perfect ? "Perfect +" : "+") + d.points,
+          x: Math.min(W - 60, Math.max(60, slot.x)),
+          y: slot.y - CUP_H - 8,
+          life: 0.7,
+        });
         g.drop = null;
         if (g.next >= g.slots.length) {
-          g.score += 50;
+          g.score += PYRAMID_BONUS;
           g.speed = Math.min(MAX_SPEED, g.speed + SPEED_PER_PYRAMID);
           g.pause = 0.45;
           g.flashes.push({ text: "Pyramid! +50", x: W / 2, y: H / 2 - 30, life: 1 });
@@ -137,7 +171,8 @@ export function step(g: Game, dt: number) {
     } else {
       d.spin += dt * 9;
       if (d.y > H + CUP_H) {
-        // A miss knocks your last cup off the pyramid. Points already earned stay.
+        // A miss knocks your last cup off the pyramid and ends your streak. Points already earned stay.
+        g.streak = 0;
         if (g.next > 0) {
           g.next -= 1;
           g.placed -= 1;
@@ -228,10 +263,10 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, playing: boolean) {
 /** Rank titles, lowest score first. */
 export const RANKS: [number, string][] = [
   [0, "Benchwarmer"],
-  [50, "Cafeteria Rookie"],
-  [120, "Decent, Actually"],
+  [40, "Cafeteria Rookie"],
+  [100, "Decent, Actually"],
   [200, "Lunch Table Legend"],
-  [300, "Probably Practised In Class"],
+  [350, "Probably Practised In Class"],
 ];
 
 export function rankFor(score: number): string {
