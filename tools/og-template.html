@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  Source for public/og-image.png (the picture that shows when the link is shared).
+  To remake it: run `npm run dev`, open http://localhost:5173/tools/og-template.html,
+  set the browser window to 1200 x 630 and take a screenshot. Save it as public/og-image.png.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Share image</title>
+    <style>
+      @font-face {
+        font-family: "Anton";
+        src: url("/node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "DM Sans";
+        font-weight: 100 1000;
+        src: url("/node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2") format("woff2");
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr 470px;
+        gap: 40px;
+        align-items: center;
+        padding: 50px 56px;
+        font-family: "DM Sans", sans-serif;
+        color: #14110f;
+        background-color: #fff6e5;
+        background-image: radial-gradient(rgba(20, 17, 15, 0.08) 1.5px, transparent 1.8px);
+        background-size: 18px 18px;
+      }
+      .label {
+        font-size: 30px;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 10px 0 18px;
+        font-family: "Anton", sans-serif;
+        font-weight: 400;
+        font-size: 138px;
+        line-height: 0.88;
+        text-transform: uppercase;
+      }
+      .tag {
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.1;
+        color: #d7141a;
+      }
+      .panel {
+        height: 530px;
+        display: grid;
+        place-items: end center;
+        overflow: hidden;
+        background: repeating-conic-gradient(from -5deg at 50% 100%, #fffdf8 0 10deg, #ffd9cf 10deg 20deg);
+        border: 5px solid #14110f;
+        border-radius: 24px;
+        box-shadow: 9px 9px 0 #14110f;
+      }
+      svg {
+        width: 100%;
+        height: 86%;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <p class="label">A Minute to Win It fundraiser for CHEO</p>
+      <h1>Minutes<br />That<br />Matter</h1>
+      <p class="tag">The most intense minute of your lunch.</p>
+    </div>
+    <div class="panel">
+      <svg viewBox="0 0 320 300" id="art">
+        <defs>
+          <g id="cup">
+            <path d="M15 4h30l10 58H5z" fill="#d7141a" stroke="#14110f" stroke-width="2.5" stroke-linejoin="round" />
+            <path d="M13.5 20h33M12.5 26h35" stroke="#a80e13" stroke-width="2" />
+            <path d="M20 9l-6 46" stroke="#fff" stroke-opacity=".35" stroke-width="3" stroke-linecap="round" />
+            <rect x="2" y="59" width="56" height="9" rx="4" fill="#fff" stroke="#14110f" stroke-width="2.5" />
+          </g>
+        </defs>
+      </svg>
+    </div>
+    <script>
+      const art = document.getElementById("art");
+      const ns = "http://www.w3.org/2000/svg";
+      [4, 3, 2, 1].forEach((count, row) => {
+        for (let i = 0; i < count; i++) {
+          const use = document.createElementNS(ns, "use");
+          use.setAttribute("href", "#cup");
+          use.setAttribute("x", 40 + row * 30 + i * 60);
+          use.setAttribute("y", 200 - row * 62);
+          art.appendChild(use);
+        }
+      });
+      const table = document.createElementNS(ns, "rect");
+      Object.entries({ x: 6, y: 268, width: 308, height: 12, rx: 4, fill: "#14110f" }).forEach(([k, v]) =>
+        table.setAttribute(k, v),
+      );
+      art.appendChild(table);
+    </script>
+  </body>
+</html>
