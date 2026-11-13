@@ -27,7 +27,7 @@ import {
 import { forced3D } from "../lib/device";
 import { useInView } from "../lib/useInView";
 
-/* â”€â”€ Shapes and materials, made once and shared by every cup â”€â”€ */
+/* ── Shapes and materials, made once and shared by every cup ── */
 const RIM_R = 0.4;
 const BASE_R = 0.27;
 const CUP_H = 1;
@@ -58,7 +58,7 @@ const HULL = (() => {
   return new Float32Array(pts);
 })();
 
-/* â”€â”€ Where each cup lives in the pyramid: rows of 4, 3, 2, 1 â”€â”€ */
+/* ── Where each cup lives in the pyramid: rows of 4, 3, 2, 1 ── */
 const SPACING = 0.87;
 const HOMES: Vector3[] = [];
 [4, 3, 2, 1].forEach((count, row) => {
@@ -81,7 +81,11 @@ export interface SceneApi {
   restack: () => void;
 }
 
-function Scene({ apiRef, onMess }: { apiRef: RefObject<SceneApi | null>; onMess: () => void }) {
+function Scene({ apiRef, onMess, onReady }: {
+  apiRef: RefObject<SceneApi | null>;
+  onMess: () => void;
+  onReady: () => void;
+}) {
   const { rapier } = useRapier();
   const cups = useRef<(RapierRigidBody | null)[]>([]);
   const balls = useRef<(RapierRigidBody | null)[]>([]);
@@ -118,7 +122,11 @@ function Scene({ apiRef, onMess }: { apiRef: RefObject<SceneApi | null>; onMess:
         restack.current = { t0: performance.now(), from };
       },
     };
-  }, [apiRef, onMess, rapier]);
+    onReady();
+    return () => {
+      apiRef.current = null;
+    };
+  }, [apiRef, onMess, onReady, rapier]);
 
   // Restack: each cup flies home in a little arc, bottom row first.
   useFrame(() => {
@@ -266,6 +274,7 @@ export default function CupScene({ onGiveUp }: { onGiveUp: () => void }) {
   const [wrapRef, inView] = useInView<HTMLDivElement>(false, 0.05);
   const [tabVisible, setTabVisible] = useState(!document.hidden);
   const [dpr, setDpr] = useState(() => Math.min(1.5, window.devicePixelRatio || 1));
+  const [ready, setReady] = useState(false);
   const [messy, setMessy] = useState(false);
   const [touched, setTouched] = useState(false);
   const api = useRef<SceneApi | null>(null);
@@ -282,6 +291,7 @@ export default function CupScene({ onGiveUp }: { onGiveUp: () => void }) {
     setMessy(true);
     setTouched(true);
   }, []);
+  const onReady = useCallback(() => setReady(true), []);
 
   // If the phone can't keep up: first drop the resolution, then switch to the illustration.
   const onDecline = useCallback(() => {
@@ -307,14 +317,15 @@ export default function CupScene({ onGiveUp }: { onGiveUp: () => void }) {
         <CameraRig />
         <PerformanceMonitor bounds={() => [35, 62]} onDecline={onDecline} />
         <Physics gravity={[0, -22, 0]} paused={!active}>
-          <Scene apiRef={api} onMess={onMess} />
+          <Scene apiRef={api} onMess={onMess} onReady={onReady} />
         </Physics>
       </Canvas>
 
-      {!touched && <p className="scene3d__hint">Tap or swipe the cups</p>}
+      {ready && !touched && <p className="scene3d__hint">Tap or swipe the cups</p>}
       <button
         type="button"
         className="btn btn--sm scene3d__btn"
+        disabled={!ready}
         onClick={() => {
           if (messy) {
             api.current?.restack();

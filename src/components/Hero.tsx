@@ -9,15 +9,15 @@ import { StaticHero } from "./StaticHero";
 const CupScene = lazy(() => import("../three/CupScene"));
 
 /** If the 3D scene crashes for any reason, quietly show the illustration instead. */
-class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }> {
-  componentDidCatch() {
-    this.props.onError();
-  }
+class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
   static getDerivedStateFromError() {
-    return null;
+    return { failed: true };
   }
+
   render() {
-    return this.props.children;
+    return this.state.failed ? this.props.fallback : this.props.children;
   }
 }
 
@@ -52,7 +52,7 @@ function HeroScene() {
   return (
     <div className="hero__scene">
       {use3D ? (
-        <SceneBoundary onError={() => setUse3D(false)}>
+        <SceneBoundary fallback={fallback}>
           <Suspense fallback={fallback}>
             <CupScene onGiveUp={() => setUse3D(false)} />
           </Suspense>

@@ -1,23 +1,73 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { event } from "../config/event";
 import { draw, GAME_SECONDS, H, newGame, rankFor, RANKS, step, tap, W, type Game } from "../game/engine";
+import { countdown } from "../lib/format";
+import { checkName, fetchTop, leaderboardOn, loadName, NAME_MAX, postScore, saveName, type Row } from "../lib/leaderboard";
 import { loadBest, saveBest } from "../lib/share";
+import { Leaderboard, type BoardStatus } from "./Leaderboard";
 import { SectionHead } from "./SectionHead";
 import { ShareButton } from "./ShareButton";
 
 type Phase = "idle" | "playing" | "done";
+type PostState = "idle" | "sending" | "sent" | "error";
 
 export function TryOne() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tapRef = useRef<HTMLButtonElement>(null);
+  const replayRef = useRef<HTMLButtonElement>(null);
   const game = useRef<Game>(newGame());
+  const deadline = useRef(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [seconds, setSeconds] = useState(GAME_SECONDS);
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(0);
+  const [best, setBest] = useState(loadBest);
   const [newBest, setNewBest] = useState(false);
 
-  useEffect(() => setBest(loadBest()), []);
+  // Leaderboard
+  const [rows, setRows] = useState<Row[]>([]);
+  const [boardStatus, setBoardStatus] = useState<BoardStatus>("loading");
+  const [name, setName] = useState(loadName);
+  const [postedAs, setPostedAs] = useState(loadName);
+  const [post, setPost] = useState<PostState>("idle");
+  const [postNote, setPostNote] = useState("");
+
+  const refreshBoard = useCallback(async () => {
+    if (!leaderboardOn) return;
+    try {
+      setRows(await fetchTop());
+      setBoardStatus("ready");
+    } catch {
+      setBoardStatus("error");
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
+  async function submitScore(e: React.FormEvent) {
+    e.preventDefault();
+    if (post === "sending" || post === "sent") return;
+    const check = checkName(name);
+    if (!check.ok) {
+      setPost("error");
+      setPostNote(check.reason);
+      return;
+    }
+    setPost("sending");
+    setPostNote("");
+    try {
+      await postScore(check.name, score);
+      saveName(check.name);
+      setPostedAs(check.name);
+      setPost("sent");
+      setPostNote("Posted.");
+      await refreshBoard();
+    } catch {
+      setPost("error");
+      setPostNote("That didn't go through. Try again in a minute.");
+    }
+  }
 
   // Size the canvas for sharp lines without overdoing it on dense screens.
   useEffect(() => {
@@ -40,38 +90,48 @@ export function TryOne() {
     let last = performance.now();
     const frame = (now: number) => {
       const g = game.current;
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const running = step(g, dt);
+      const end = Math.min(now, deadline.current);
+      const dt = Math.min(0.05, Math.max(0, end - last) / 1000);
+      const remaining = Math.max(0, deadline.current - now);
+      last = end;
+      const running = remaining > 0;
+      step(g, dt);
       draw(ctx, g, running);
-      setSeconds(Math.ceil(g.timeLeft));
+      setSeconds(Math.ceil(remaining / 1000));
       setScore(g.score);
       if (running) {
         raf = requestAnimationFrame(frame);
       } else {
-        const previous = loadBest();
+        const previous = Math.max(best, loadBest());
         if (g.score > previous) {
           saveBest(g.score);
-          setBest(g.score);
           setNewBest(true);
         }
+        setBest(Math.max(g.score, previous));
+        const moveFocus = document.activeElement === tapRef.current;
         setPhase("done");
+        if (moveFocus) requestAnimationFrame(() => replayRef.current?.focus({ preventScroll: true }));
       }
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [phase]);
+  }, [best, phase]);
 
   const start = useCallback(() => {
     game.current = newGame();
+    deadline.current = performance.now() + GAME_SECONDS * 1000;
     setScore(0);
     setSeconds(GAME_SECONDS);
     setNewBest(false);
+    setPost("idle");
+    setPostNote("");
     setPhase("playing");
     requestAnimationFrame(() => tapRef.current?.focus({ preventScroll: true }));
   }, []);
 
-  const drop = () => phase === "playing" && tap(game.current);
+  const drop = () => {
+    if (phase === "playing" && performance.now() < deadline.current) tap(game.current);
+  };
   const rank = rankFor(score);
 
   return (
@@ -86,7 +146,7 @@ export function TryOne() {
       <div className="arena">
         <div className="arena__hud">
           <span>
-            Time <strong>0:{String(seconds).padStart(2, "0")}</strong>
+            Time <strong>{countdown(seconds)}</strong>
           </span>
           <span>
             Score <strong>{score}</strong>
@@ -103,7 +163,9 @@ export function TryOne() {
             className="arena__tap"
             aria-label="Drop the cup"
             disabled={phase !== "playing"}
-            onPointerDown={drop}
+            onPointerDown={(e) => {
+              if (e.isPrimary && e.button === 0) drop();
+            }}
             onClick={(e) => {
               if (e.detail === 0) drop(); // keyboard (Space or Enter)
             }}
@@ -125,8 +187,31 @@ export function TryOne() {
               <p className="arena__score">{score}</p>
               <p className="arena__rank">{rank}</p>
               {newBest && <p className="arena__best">New best</p>}
-              <div className="arena__actions">
-                <button type="button" className="btn" onClick={start}>
+              {leaderboardOn && score > 0 && (
+                <form className="postscore" onSubmit={submitScore}>
+                  <label htmlFor="post-name">Name for the leaderboard</label>
+                  <div className="postscore__row">
+                    <input
+                      id="post-name"
+                      type="text"
+                      value={name}
+                      maxLength={NAME_MAX}
+                      autoComplete="off"
+                      autoCapitalize="words"
+                      enterKeyHint="send"
+                      disabled={post === "sending" || post === "sent"}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    <button type="submit" className="btn btn--sm" disabled={post === "sending" || post === "sent"}>
+                      {post === "sending" ? "Posting" : post === "sent" ? "Posted" : "Post"}
+                    </button>
+                  </div>
+                  <p className="postscore__note" role="status">
+                    {post === "idle" ? "Use a name your friends know you by. Keep it clean." : postNote}
+                  </p>
+                </form>
+              )}              <div className="arena__actions">
+                <button ref={replayRef} type="button" className="btn" onClick={start}>
                   Play again
                 </button>
                 <ShareButton
@@ -143,8 +228,10 @@ export function TryOne() {
         </p>
       </div>
 
-      <aside className="ranks" aria-labelledby="ranks-title">
-        <h3 id="ranks-title">Ranks</h3>
+      <aside className="ranks" aria-labelledby="board-title">
+        <Leaderboard rows={rows} status={boardStatus} myName={postedAs} />
+        <details className="ranks__more">
+        <summary>Rank titles and scoring</summary>
         <ol className="ranks__list">
           {[...RANKS].reverse().map(([min, name]) => {
             const earned = best > 0 && rankFor(best) === name;
@@ -161,6 +248,7 @@ export function TryOne() {
           10 points for every cup you land. 25 if it's dead centre. 50 more each time you finish a pyramid, and
           then the next one is bigger and faster.
         </p>
+        </details>
       </aside>
       </div>
     </section>

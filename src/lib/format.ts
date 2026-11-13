@@ -7,6 +7,9 @@ const cad = new Intl.NumberFormat("en-CA", {
 
 export const money = (n: number) => cad.format(n);
 
+export const countdown = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
 /** True when a config value has actually been filled in. */
 export const isSet = (v: string | null | undefined): v is string =>
   typeof v === "string" && v.trim() !== "" && v.trim().toUpperCase() !== "TBD";

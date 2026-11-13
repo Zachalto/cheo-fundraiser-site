@@ -30,8 +30,8 @@ export function Footer() {
         {isSet(event.teacherContact) ? event.teacherContact : "[placeholder: to be added]"}
       </p>
       <p className="footer__small">
-        A student-run fundraiser. Not an official {event.charity} website. This site takes no payments and
-        collects no personal information.
+        A student-run fundraiser. Not an official {event.charity} website. This site takes no payments. The only thing it
+        stores is the name and score you choose to post to the game leaderboard.
       </p>
     </footer>
   );

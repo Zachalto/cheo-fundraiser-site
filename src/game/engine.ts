@@ -39,7 +39,6 @@ interface Flash {
 }
 
 export interface Game {
-  timeLeft: number;
   score: number;
   placed: number;
   base: number;
@@ -69,7 +68,6 @@ function buildSlots(base: number): Slot[] {
 
 export function newGame(): Game {
   return {
-    timeLeft: GAME_SECONDS,
     score: 0,
     placed: 0,
     base: 3,
@@ -87,16 +85,15 @@ const sliderX = (g: Game) => W / 2 + ((W - CUP_W) / 2 - 8) * Math.sin(g.phase);
 
 /** The player tapped. */
 export function tap(g: Game) {
-  if (g.drop || g.pause > 0 || g.timeLeft <= 0) return;
+  if (g.drop || g.pause > 0) return;
   const x = sliderX(g);
   const target = g.slots[g.next];
   const off = Math.abs(x - target.x);
   g.drop = { x, y: SLIDER_Y + CUP_H, slot: off <= HIT ? g.next : -1, perfect: off <= PERFECT, spin: 0 };
 }
 
-/** Advance the game by dt seconds. Returns false once time is up. */
-export function step(g: Game, dt: number): boolean {
-  g.timeLeft = Math.max(0, g.timeLeft - dt);
+/** Advance the game physics by dt seconds. */
+export function step(g: Game, dt: number) {
   g.phase += g.speed * dt;
   g.flashes = g.flashes.filter((f) => (f.life -= dt) > 0);
 
@@ -138,7 +135,6 @@ export function step(g: Game, dt: number): boolean {
       }
     }
   }
-  return g.timeLeft > 0;
 }
 
 function cupPath(ctx: CanvasRenderingContext2D) {

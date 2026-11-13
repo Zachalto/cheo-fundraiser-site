@@ -1,14 +1,14 @@
 /*
- * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * ─────────────────────────────────────────────────────────────
  *  THE ONE FILE THAT RUNS THE WHOLE SITE
- * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * ─────────────────────────────────────────────────────────────
  *  Change the text between the quotes, save, and the site updates.
  *
  *  Not decided yet? Write  null  (no quotes) and the site shows a
  *  friendly "coming soon" line instead of looking broken.
  *
- *    date: null,              â† shows "Date dropping soon"
- *    date: "Thursday, May 7", â† shows "Thursday, May 7"
+ *    date: null,              ← shows "Date dropping soon"
+ *    date: "Thursday, May 7", ← shows "Thursday, May 7"
  */
 
 export type GameAnimation = "cups" | "cookie" | "pingpong" | "balloons";
@@ -39,12 +39,12 @@ export interface Faq {
 }
 
 export const event = {
-  // â”€â”€ The name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── The name ───────────────────────────────────────────────
   name: "Minutes That Matter",
   /** Optional logo image, e.g. "/logo.svg" (put the file in /public). null = text wordmark. */
   logoSrc: null as string | null,
 
-  // â”€â”€ The one-line pitch under the name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── The one-line pitch under the name ──────────────────────
   // Alternatives we liked:
   //   "60 seconds. Red cups. Zero dignity."
   //   "Extremely serious cup games. For a seriously good cause."
@@ -53,23 +53,23 @@ export const event = {
   charity: "CHEO",
   classCode: "BOH4M",
 
-  // â”€â”€ The basics (null = not decided yet) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── The basics (null = not decided yet) ────────────────────
   date: null as string | null, // e.g. "Thursday, May 7"
-  time: null as string | null, // e.g. "11:35 â€“ 12:25"
+  time: null as string | null, // e.g. "11:35 – 12:25"
   location: null as string | null, // e.g. "Main gym"
   price: null as string | null, // e.g. "$5"
   whoCanPlay: "Any student",
 
-  // â”€â”€ Links (null = not ready yet) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Links (null = not ready yet) ───────────────────────────
   signUpUrl: null as string | null, // the Google Form link
   instagramUrl: null as string | null,
   tiktokUrl: null as string | null,
   /** The live address of this site, e.g. "https://minutes-that-matter.vercel.app". Needed for link previews. */
   siteUrl: null as string | null,
-  /** e.g. "Ms. Example â€” example@school.ca" */
+  /** e.g. "Ms. Example — example@school.ca" */
   teacherContact: null as string | null,
 
-  // â”€â”€ The games â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── The games ──────────────────────────────────────────────
   games: [
     {
       name: "Stack Attack",
@@ -101,7 +101,7 @@ export const event = {
     },
   ] as Game[],
 
-  // â”€â”€ Why CHEO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Why CHEO ───────────────────────────────────────────────
   // Sincere and short. Only write things here that are true and that
   // you can back up. Leave the list empty ( [] ) to show a placeholder.
   cheoText: [
@@ -114,7 +114,7 @@ export const event = {
     | null,
   cheoUrl: "https://www.cheo.on.ca",
 
-  // â”€â”€ The thermometer (numbers, no $ sign, no quotes) â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── The thermometer (numbers, no $ sign, no quotes) ────────
   goal: 1000,
   raisedSoFar: 0,
 
@@ -124,7 +124,21 @@ export const event = {
   // Logo files go in the public/sponsors folder. Only use a logo the sponsor sent you.
   sponsors: [] as Sponsor[],
 
-  // â”€â”€ FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Leaderboard for the cup stacking game. Setup steps are in the README.
+  leaderboard: {
+    /** From Supabase: Project Settings > API > Project URL. null = leaderboard switched off. */
+    supabaseUrl: null as string | null,
+    /** From Supabase: the "publishable" (or "anon") key. NEVER paste the "secret" or "service_role" key here. */
+    supabaseKey: null as string | null,
+    /** How many names at the top get to play live at the event. */
+    finalists: 5,
+    /** e.g. "a $25 gift card". null = "a prize, we'll say what it is soon". */
+    prize: null as string | null,
+    /** e.g. "Wednesday May 6 at 3pm". null = no closing time shown. */
+    closes: null as string | null,
+  },
+
+  // ── FAQ ────────────────────────────────────────────────────
   faq: [
     {
       question: "Do I need to be good at this?",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { event } from "../config/event";
 import { useSecondsLeft } from "../lib/clock";
+import { countdown } from "../lib/format";
 import { Wordmark } from "./Wordmark";
 import { SignUpButton } from "./SignUpButton";
 
@@ -31,7 +32,7 @@ export function TopBar() {
         className={`topbar__clock${heroClockVisible ? " topbar__clock--hidden" : ""}${left === 0 ? " topbar__clock--done" : ""}`}
         aria-hidden="true"
       >
-        0:{String(left).padStart(2, "0")}
+        {countdown(left)}
       </div>
       <SignUpButton size="sm" />
     </header>
