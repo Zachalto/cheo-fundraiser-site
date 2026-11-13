@@ -1,6 +1,11 @@
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { event } from "./src/config/event.ts";
+import vercelConfig from "./vercel.json" with { type: "json" };
+
+// "npm run preview" sends the same security headers the live site gets from vercel.json,
+// so a header that would break the page shows up before deploying.
+const securityHeaders = Object.fromEntries(vercelConfig.headers[0].headers.map((h) => [h.key, h.value]));
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -29,4 +34,5 @@ export default defineConfig({
   plugins: [react(), eventMeta()],
   // The 3D chunk is big on purpose (physics engine). It loads late and only on capable phones.
   build: { chunkSizeWarningLimit: 3500 },
+  preview: { headers: securityHeaders },
 });

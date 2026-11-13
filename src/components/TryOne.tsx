@@ -13,6 +13,8 @@ import {
   loadName,
   NAME_MAX,
   postScore,
+  PostRejected,
+  startRound,
   saveHomeroom,
   saveName,
   type Row,
@@ -44,6 +46,8 @@ export function TryOne() {
   const [homeroom, setHomeroom] = useState(loadHomeroom);
   const [postedAs, setPostedAs] = useState(loadName);
   const [myCode, setMyCode] = useState("");
+  const [trap, setTrap] = useState("");
+  const roundId = useRef("");
   const [post, setPost] = useState<PostState>("idle");
   const [postNote, setPostNote] = useState("");
 
@@ -79,7 +83,7 @@ export function TryOne() {
     setPost("sending");
     setPostNote("");
     try {
-      await postScore(check.name, score, room);
+      await postScore({ name: check.name, score, homeroom: room, roundId: roundId.current, hits: game.current.hits, trap });
       saveName(check.name);
       saveHomeroom(room);
       setMyCode(claimCode());
@@ -87,9 +91,9 @@ export function TryOne() {
       setPost("sent");
       setPostNote("Posted.");
       await refreshBoard();
-    } catch {
+    } catch (err) {
       setPost("error");
-      setPostNote("That didn't go through. Try again in a minute.");
+      setPostNote(err instanceof PostRejected ? err.message : "That didn't go through. Try again in a minute.");
     }
   }
 
@@ -143,6 +147,7 @@ export function TryOne() {
 
   const start = useCallback(() => {
     game.current = newGame();
+    roundId.current = startRound();
     deadline.current = performance.now() + GAME_SECONDS * 1000;
     setScore(0);
     setSeconds(GAME_SECONDS);
@@ -213,6 +218,17 @@ export function TryOne() {
               {newBest && <p className="arena__best">New best</p>}
               {leaderboardOn && score > 0 && (
                 <form className="postscore" onSubmit={submitScore}>
+                  {/* Hidden from people. Bots that fill in every field give themselves away. */}
+                  <input
+                    className="postscore__trap"
+                    type="text"
+                    name="website"
+                    value={trap}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    onChange={(e) => setTrap(e.target.value)}
+                  />
                   <label htmlFor="post-name">Name for the leaderboard</label>
                   <div className="postscore__row">
                     <input

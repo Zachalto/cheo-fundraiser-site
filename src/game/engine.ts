@@ -57,6 +57,8 @@ interface Flash {
 
 export interface Game {
   score: number;
+  /** Cups landed in total, including ones later knocked off. Sent with the score as a sanity check. */
+  hits: number;
   placed: number;
   base: number;
   slots: Slot[];
@@ -89,6 +91,7 @@ function buildSlots(base: number): Slot[] {
 export function newGame(): Game {
   return {
     score: 0,
+    hits: 0,
     placed: 0,
     base: 3,
     slots: buildSlots(3),
@@ -151,6 +154,7 @@ export function step(g: Game, dt: number) {
         g.placed += 1;
         g.next += 1;
         g.score += d.points;
+        g.hits += 1;
         g.streak += 1;
         g.speed = Math.min(MAX_SPEED, g.speed + SPEED_PER_CUP);
         g.phase = Math.random() * Math.PI * 2; // the next cup starts somewhere new, so there's no rhythm to learn

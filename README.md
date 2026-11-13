@@ -54,11 +54,24 @@ Knowing who is who:
 - Every phone that posts a score gets a six-character **claim code**. The player sees it under the leaderboard; the public never does.
 - Players can also type a **homeroom**. It is optional and private.
 - To check a finalist: Supabase dashboard > Table Editor > `scores`, find their row, and ask them to show the same claim code on their phone. The homeroom column helps you find them before the event.
+Catching cheaters and bots:
+
+- A score only counts if the database saw that round start about a minute earlier, and each round can be used once. Someone sending fake scores has to wait a minute per attempt.
+- Some posts are **flagged**: the sender is told it worked, but the row never shows on the board. This happens when the score is higher than a person can reach, doesn't match the number of cups landed, comes from a bot that filled in a hidden form field, or one phone posts more than five times in ten minutes.
+- To see them: Table Editor > `scores`, and look at the `flagged` and `flag_reason` columns. Their claim code and homeroom are in the same row.
+- **Hide a rude name:** set `flagged` to true on that row. **Un-hide a score you believe is real:** set it to false.
+- None of this makes a browser game cheat-proof. A determined person can still fake a believable score, which is why the prize is decided live.
+
+Security headers:
+
+- `vercel.json` tells browsers to only run this site's own code, only talk to the leaderboard database, and never show the site inside another page. `npm run preview` uses the same rules, so test there before deploying.
+- If you move to a different Supabase project, change the address in `vercel.json` as well as in the config file, or the leaderboard will be blocked.
+
 Looking after it:
 
 - **Remove a name:** Supabase dashboard > Table Editor > `scores` > tick the row > Delete. There is a bad-word filter, but someone will find a way around it, so check the board now and then.
 - **Close it:** set `supabaseUrl` back to `null` and push. Take a screenshot of the top 5 first.
-- **What it stores:** the name typed, the score, the time, the optional homeroom and the claim code. Nothing else, and nothing about people who only visit. Tell your teacher the site now stores student-chosen names, since that is a change from "collects nothing".
+- **What it stores:** the name typed, the score, the time, the optional homeroom, the claim code and the number of cups landed. Nothing else, and nothing about people who only visit. Tell your teacher the site now stores student-chosen names, since that is a change from "collects nothing".
 - Free Supabase projects pause after about a week with no activity. If the board stops loading, open the dashboard and un-pause the project.
 
 ### CHEO logo

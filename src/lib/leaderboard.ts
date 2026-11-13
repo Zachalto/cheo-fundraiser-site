@@ -68,13 +68,58 @@ export async function fetchTop(): Promise<Row[]> {
   return best;
 }
 
-export async function postScore(name: string, score: number, homeroom: string): Promise<void> {
+/** Thrown when the database turns a post down with a message meant for the player. */
+export class PostRejected extends Error {}
+
+export interface ScorePost {
+  name: string;
+  score: number;
+  homeroom: string;
+  /** The id registered with startRound() when this round began. */
+  roundId: string;
+  /** Cups landed during the round. */
+  hits: number;
+  /** Whatever ended up in the hidden form field. Real players leave it empty. */
+  trap: string;
+}
+
+/**
+ * Tells the database a round has begun. The database stamps the time itself, and later only
+ * accepts a score for a round that started about a minute earlier and hasn't been used.
+ */
+export function startRound(): string {
+  const id = crypto.randomUUID();
+  if (leaderboardOn) {
+    fetch(`${endpoint().replace(/scores$/, "rounds")}`, {
+      method: "POST",
+      headers: { ...headers(), Prefer: "return=minimal" },
+      body: JSON.stringify({ id }),
+    }).catch(() => {
+      /* offline: the game still plays, the score just can't be posted */
+    });
+  }
+  return id;
+}
+
+export async function postScore(post: ScorePost): Promise<void> {
   const res = await fetch(endpoint(), {
     method: "POST",
     headers: { ...headers(), Prefer: "return=minimal" },
-    body: JSON.stringify({ name, score, homeroom: homeroom || null, claim_code: claimCode() }),
+    body: JSON.stringify({
+      name: post.name,
+      score: post.score,
+      homeroom: post.homeroom || null,
+      claim_code: claimCode(),
+      round_id: post.roundId,
+      hits: post.hits,
+      trap: post.trap.slice(0, 200) || null,
+    }),
   });
-  if (!res.ok) throw new Error(`Leaderboard post failed (${res.status})`);
+  if (res.ok) return;
+  // P0001 is a message the database wrote for the player (bad name, round not verified, too busy).
+  const body = (await res.json().catch(() => null)) as { code?: string; message?: string } | null;
+  if (body?.code === "P0001" && body.message) throw new PostRejected(body.message);
+  throw new Error(`Leaderboard post failed (${res.status})`);
 }
 
 export const HOMEROOM_MAX = 12;
