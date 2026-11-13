@@ -139,7 +139,7 @@ export function TryOne() {
       <SectionHead
         id="try-title"
         title="Try one"
-        sub="Tap to drop the cup onto the dashed outline. You get 60 seconds to stack as many as you can."
+        sub="Tap to drop the cup onto the dashed outline. Miss and you lose the last cup you placed. You get 60 seconds."
       />
 
       <div className="tryone__layout">
@@ -246,7 +246,7 @@ export function TryOne() {
         </ol>
         <p className="ranks__scoring">
           10 points for every cup you land. 25 if it's dead centre. 50 more each time you finish a pyramid, and
-          then the next one is bigger and faster.
+          then the next one is bigger and faster. Miss, and your last cup gets knocked off.
         </p>
         </details>
       </aside>

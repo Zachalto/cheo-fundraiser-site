@@ -12,8 +12,14 @@ const CUP_W = 46;
 const CUP_H = 52;
 const SLIDER_Y = 34;
 const FLOOR_Y = H - 22;
-const HIT = CUP_W * 0.5;
-const PERFECT = CUP_W * 0.12;
+// How close to the outline a drop has to be. Smaller numbers = harder.
+const HIT = CUP_W * 0.34;
+const PERFECT = CUP_W * 0.08;
+// How fast the cup slides: at the start, the top speed, and how much it speeds up.
+const START_SPEED = 2.6;
+const MAX_SPEED = 4.4;
+const SPEED_PER_CUP = 0.05;
+const SPEED_PER_PYRAMID = 0.3;
 const MAX_BASE = 5;
 
 const RED = "#d7141a";
@@ -74,7 +80,7 @@ export function newGame(): Game {
     slots: buildSlots(3),
     next: 0,
     phase: Math.PI / 2,
-    speed: 2.0,
+    speed: START_SPEED,
     drop: null,
     pause: 0,
     flashes: [],
@@ -117,12 +123,13 @@ export function step(g: Game, dt: number) {
         g.placed += 1;
         g.next += 1;
         g.score += d.perfect ? 25 : 10;
-        g.speed = Math.min(4, g.speed + 0.03);
+        g.speed = Math.min(MAX_SPEED, g.speed + SPEED_PER_CUP);
+        g.phase = Math.random() * Math.PI * 2; // the next cup starts somewhere new, so there's no rhythm to learn
         g.flashes.push({ text: d.perfect ? "Perfect +25" : "+10", x: slot.x, y: slot.y - CUP_H - 8, life: 0.7 });
         g.drop = null;
         if (g.next >= g.slots.length) {
           g.score += 50;
-          g.speed = Math.min(4, g.speed + 0.2);
+          g.speed = Math.min(MAX_SPEED, g.speed + SPEED_PER_PYRAMID);
           g.pause = 0.45;
           g.flashes.push({ text: "Pyramid! +50", x: W / 2, y: H / 2 - 30, life: 1 });
         }
@@ -130,7 +137,17 @@ export function step(g: Game, dt: number) {
     } else {
       d.spin += dt * 9;
       if (d.y > H + CUP_H) {
-        g.flashes.push({ text: "Miss", x: d.x, y: FLOOR_Y - 30, life: 0.6 });
+        // A miss knocks your last cup off the pyramid. Points already earned stay.
+        if (g.next > 0) {
+          g.next -= 1;
+          g.placed -= 1;
+          const lost = g.slots[g.next];
+          lost.filled = false;
+          g.flashes.push({ text: "Miss. Cup lost", x: lost.x, y: lost.y - CUP_H - 8, life: 0.8 });
+        } else {
+          g.flashes.push({ text: "Miss", x: d.x, y: FLOOR_Y - 30, life: 0.6 });
+        }
+        g.phase = Math.random() * Math.PI * 2;
         g.drop = null;
       }
     }
@@ -211,10 +228,10 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, playing: boolean) {
 /** Rank titles, lowest score first. */
 export const RANKS: [number, string][] = [
   [0, "Benchwarmer"],
-  [100, "Cafeteria Rookie"],
-  [250, "Decent, Actually"],
-  [400, "Lunch Table Legend"],
-  [550, "Probably Practised In Class"],
+  [50, "Cafeteria Rookie"],
+  [120, "Decent, Actually"],
+  [200, "Lunch Table Legend"],
+  [300, "Probably Practised In Class"],
 ];
 
 export function rankFor(score: number): string {
