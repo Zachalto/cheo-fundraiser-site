@@ -65,7 +65,7 @@ export const event = {
   instagramUrl: null as string | null,
   tiktokUrl: null as string | null,
   /** The live address of this site, e.g. "https://minutes-that-matter.vercel.app". Needed for link previews. */
-  siteUrl: null as string | null,
+  siteUrl: "https://minutes-that-matter.vercel.app" as string | null,
   /** e.g. "Ms. Example — example@school.ca" */
   teacherContact: null as string | null,
 

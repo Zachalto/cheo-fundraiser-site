@@ -1,5 +1,7 @@
 # Minutes That Matter
 
+Live site: https://minutes-that-matter.vercel.app
+
 The website for the BOH4M class "Minute to Win It" fundraiser for CHEO. It is a static site with no analytics, no cookies and no payments. Sign-up is a link out to a Google Form. The only thing it stores online is the mini-game leaderboard (a name and a score), in a free Supabase database.
 
 ## How to update the site
