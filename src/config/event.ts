@@ -1,14 +1,12 @@
 /*
- * ─────────────────────────────────────────────────────────────
- *  THE ONE FILE THAT RUNS THE WHOLE SITE
- * ─────────────────────────────────────────────────────────────
- *  Change the text between the quotes, save, and the site updates.
+ * Almost all the text on the site comes from this file. Change what's between
+ * the quotes, save, and the site updates.
  *
- *  Not decided yet? Write  null  (no quotes) and the site shows a
- *  friendly "coming soon" line instead of looking broken.
+ * If something isn't decided yet, write null (no quotes) and the site shows a
+ * "coming soon" line instead of a blank spot:
  *
- *    date: null,              ← shows "Date dropping soon"
- *    date: "Thursday, May 7", ← shows "Thursday, May 7"
+ *   date: null,               shows "Date dropping soon"
+ *   date: "Thursday, May 7",  shows "Thursday, May 7"
  */
 
 export type GameAnimation = "cups" | "cookie" | "pingpong" | "balloons";
@@ -39,12 +37,12 @@ export interface Faq {
 }
 
 export const event = {
-  // ── The name ───────────────────────────────────────────────
+  // The name
   name: "Minutes That Matter",
   /** Optional logo image, e.g. "/logo.svg" (put the file in /public). null = text wordmark. */
   logoSrc: null as string | null,
 
-  // ── The one-line pitch under the name ──────────────────────
+  // The one-line pitch under the name
   // Alternatives we liked:
   //   "60 seconds. Red cups. Zero dignity."
   //   "Extremely serious cup games. For a seriously good cause."
@@ -53,23 +51,23 @@ export const event = {
   charity: "CHEO",
   classCode: "BOH4M",
 
-  // ── The basics (null = not decided yet) ────────────────────
+  // The basics (null = not decided yet)
   date: null as string | null, // e.g. "Thursday, May 7"
-  time: null as string | null, // e.g. "11:35 – 12:25"
+  time: null as string | null, // e.g. "11:35 to 12:25"
   location: null as string | null, // e.g. "Main gym"
   price: null as string | null, // e.g. "$5"
   whoCanPlay: "Any student",
 
-  // ── Links (null = not ready yet) ───────────────────────────
+  // Links (null = not ready yet)
   signUpUrl: null as string | null, // the Google Form link
   instagramUrl: null as string | null,
   tiktokUrl: null as string | null,
   /** The live address of this site, e.g. "https://minutes-that-matter.vercel.app". Needed for link previews. */
   siteUrl: "https://minutes-that-matter.vercel.app" as string | null,
-  /** e.g. "Ms. Example — example@school.ca" */
+  /** e.g. "Ms. Example, example@school.ca" */
   teacherContact: null as string | null,
 
-  // ── The games ──────────────────────────────────────────────
+  // The games
   games: [
     {
       name: "Stack Attack",
@@ -101,7 +99,7 @@ export const event = {
     },
   ] as Game[],
 
-  // ── Why CHEO ───────────────────────────────────────────────
+  // Why CHEO
   // Sincere and short. Only write things here that are true and that
   // you can back up. Leave the list empty ( [] ) to show a placeholder.
   cheoText: [
@@ -114,11 +112,11 @@ export const event = {
     | null,
   cheoUrl: "https://www.cheo.on.ca",
 
-  // ── The thermometer (numbers, no $ sign, no quotes) ────────
+  // The thermometer (numbers, no $ sign, no quotes)
   goal: 1000,
   raisedSoFar: 0,
 
-  // ── Sponsors ───────────────────────────────────────────────
+  // Sponsors
   // Add one line per sponsor between the [ ]. Only the name is required.
   //   { name: "Example Pizza", url: "https://example.com", logoSrc: "/sponsors/example-pizza.png" },
   // Logo files go in the public/sponsors folder. Only use a logo the sponsor sent you.
@@ -138,7 +136,7 @@ export const event = {
     closes: null as string | null,
   },
 
-  // ── FAQ ────────────────────────────────────────────────────
+  // FAQ
   faq: [
     {
       question: "Do I need to be good at this?",

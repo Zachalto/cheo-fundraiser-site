@@ -1,4 +1,4 @@
-/* ── Tokens ─────────────────────────────────────────────── */
+/* Tokens */
 :root {
   --cream: #fff6e5;
   --paper: #fffdf8;
@@ -18,7 +18,7 @@
   --bar-h: 58px;
 }
 
-/* ── Base ───────────────────────────────────────────────── */
+/* Base */
 *,
 *::before,
 *::after {
@@ -102,7 +102,7 @@ a {
   top: 12px;
 }
 
-/* ── Shared bits ────────────────────────────────────────── */
+/* Shared bits */
 .wordmark {
   font-family: var(--display);
   text-transform: uppercase;
@@ -190,7 +190,7 @@ a {
   border-radius: 8px;
 }
 
-/* ── Top bar ────────────────────────────────────────────── */
+/* Top bar */
 .topbar {
   position: sticky;
   top: 0;
@@ -332,7 +332,7 @@ a {
   color: var(--red);
 }
 
-/* ── Sections ───────────────────────────────────────────── */
+/* Sections */
 .section {
   padding: clamp(48px, 12vw, 96px) var(--gutter);
 }
@@ -358,7 +358,7 @@ a {
   font-weight: 500;
 }
 
-/* ── Basics ─────────────────────────────────────────────── */
+/* Basics */
 .stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -483,7 +483,7 @@ a {
   animation: bob 2.6s ease-in-out infinite alternate;
 }
 
-/* ── Try one ────────────────────────────────────────────── */
+/* Try one */
 .cheo {
   background: var(--paper);
   border-block: var(--edge);
@@ -507,7 +507,7 @@ a {
   color: var(--red-deep);
 }
 
-/* ── Thermometer ────────────────────────────────────────── */
+/* Thermometer */
 .thermo__wrap {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -572,7 +572,7 @@ a {
   font-weight: 500;
 }
 
-/* ── Sign up + FAQ ──────────────────────────────────────── */
+/* Sign up + FAQ */
 .signup {
   display: grid;
   gap: 40px;
@@ -625,13 +625,13 @@ a {
   color: var(--red);
 }
 .faq__item[open] summary::after {
-  content: "–";
+  content: "−";
 }
 .faq__item p {
   padding: 0 16px 16px;
 }
 
-/* ── Footer ─────────────────────────────────────────────── */
+/* Footer */
 .footer {
   display: grid;
   gap: 12px;
@@ -667,7 +667,7 @@ a {
   box-shadow: none;
 }
 
-/* ── Bigger screens ─────────────────────────────────────── */
+/* Bigger screens */
 @media (min-width: 700px) {
   .game-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -713,7 +713,7 @@ a {
   }
 }
 
-/* ── Motion ─────────────────────────────────────────────── */
+/* Motion */
 @keyframes blink {
   50% {
     opacity: 0.25;
@@ -825,8 +825,6 @@ a {
     transition: none !important;
   }
 }
-
-/* == Added in stages b to e ================================== */
 
 /* Buttons */
 .btn {

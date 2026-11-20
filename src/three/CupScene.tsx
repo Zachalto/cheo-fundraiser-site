@@ -27,7 +27,7 @@ import {
 import { forced3D } from "../lib/device";
 import { useInView } from "../lib/useInView";
 
-/* ── Shapes and materials, made once and shared by every cup ── */
+/* Shapes and materials, made once and shared by every cup */
 const RIM_R = 0.4;
 const BASE_R = 0.27;
 const CUP_H = 1;
@@ -58,7 +58,7 @@ const HULL = (() => {
   return new Float32Array(pts);
 })();
 
-/* ── Where each cup lives in the pyramid: rows of 4, 3, 2, 1 ── */
+/* Where each cup lives in the pyramid: rows of 4, 3, 2, 1 */
 const SPACING = 0.87;
 const HOMES: Vector3[] = [];
 [4, 3, 2, 1].forEach((count, row) => {

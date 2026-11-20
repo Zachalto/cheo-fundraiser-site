@@ -2,19 +2,19 @@
 
 Live site: https://minutes-that-matter.vercel.app
 
-The website for the BOH4M class "Minute to Win It" fundraiser for CHEO. It is a static site with no analytics, no cookies and no payments. Sign-up is a link out to a Google Form. The only thing it stores online is the mini-game leaderboard (a name and a score), in a free Supabase database.
+This is the website for our BOH4M "Minute to Win It" fundraiser for CHEO. It's a static site. It doesn't track anyone, doesn't use cookies and doesn't take payments. Sign-up goes through a Google Form. The only thing saved online is the mini-game leaderboard (a name and a score), which lives in a free Supabase database.
 
-## How to update the site
+## Updating the site
 
-Almost everything you see on the site comes from one file: `src/config/event.ts`. You don't need to know how to code to change it.
+Almost everything on the site comes from one file, `src/config/event.ts`. You don't need to know how to code to change it.
 
-1. Open `src/config/event.ts`. On GitHub you can do this in the browser: click the file, then the pencil icon.
-2. Change the text between the quotes. Keep the quotes and the comma at the end of the line.
-3. Save (on GitHub: "Commit changes"). If the site is connected to Vercel, it rebuilds itself in about a minute.
+1. Open `src/config/event.ts`. You can do this right on GitHub: click the file, then the pencil icon.
+2. Change the text between the quotes. Leave the quotes and the comma at the end of the line alone.
+3. Save it (on GitHub that's "Commit changes"). The site rebuilds itself in about a minute.
 
-### Things that aren't decided yet
+### Stuff we haven't decided yet
 
-If something isn't decided, write `null` with no quotes. The site shows a "coming soon" line in its place.
+If something isn't decided, write `null` with no quotes and the site shows a "coming soon" line instead.
 
 ```ts
 date: null,               // shows "Date dropping soon"
@@ -29,95 +29,90 @@ date: "Thursday, May 7",  // shows "Thursday, May 7"
 | `logoSrc` | Put a logo file in `public/` and write its name here, like `"/logo.svg"`, to replace the text name |
 | `tagline` | The red line under the name |
 | `date`, `time`, `location`, `price`, `whoCanPlay` | The cards in "The basics" |
-| `signUpUrl` | The Google Form link. Until this is filled in, the buttons say "Sign-ups open soon" |
+| `signUpUrl` | The Google Form link. Until it's filled in, the buttons say "Sign-ups open soon" |
 | `instagramUrl`, `tiktokUrl` | Footer links |
-| `siteUrl` | The site's address once it's live. Used for link previews and the Share button |
+| `siteUrl` | The site's address. Used for link previews and the Share button |
 | `teacherContact` | Footer |
-| `games` | The game cards. Each has a `name`, a `rule`, a `difficulty` from 1 to 5, a joke `difficultyNote`, and an `animation` |
-| `cheoText` | The sentences in "Why CHEO". Only write things that are true |
-| `cheoTodo` | A yellow reminder note in "Why CHEO". Set it to `null` once the class has written its own sentence |
+| `games` | The game cards. Each one has a `name`, a `rule`, a `difficulty` from 1 to 5, a joke `difficultyNote`, and an `animation` |
+| `cheoText` | The sentences in "Why CHEO". Only put true things here |
+| `cheoTodo` | A yellow reminder note in "Why CHEO". Set it to `null` once we've written our own sentence |
 | `goal`, `raisedSoFar` | The thermometer. Plain numbers, no `$` and no quotes |
 | `faq` | The questions and answers |
-| `sponsors` | The sponsor cards. Empty list shows a "looking for sponsors" note |
-| `leaderboard` | The game leaderboard: database address and key, how many finalists, the prize, the closing time |
+| `sponsors` | The sponsor cards. If the list is empty it shows a "looking for sponsors" note |
+| `leaderboard` | Database address and key, how many finalists, the prize, the closing time |
 
-For `animation`, pick one of `"cups"`, `"cookie"`, `"pingpong"` or `"balloons"`.
+`animation` has to be one of `"cups"`, `"cookie"`, `"pingpong"` or `"balloons"`.
 
-### The leaderboard
+## The leaderboard
 
-The cup stacking game has a shared leaderboard. People type a name after a round and their score is posted. The top 5 names when it closes play the game live at the event, and the best live score wins the prize. The online board only picks who gets to play live, because scores from a browser game can be faked by someone who knows how.
+The cup stacking game has a shared leaderboard. After a round, people type a name and their score gets posted. Whoever's in the top 5 when it closes plays the game live at the event, and the best live score wins the prize. We only use the online board to pick who plays live, because anyone who knows what they're doing can fake a score in a browser game.
 
-It runs on a free Supabase project called `cheo-leaderboard` (Canada region), which is already set up and connected. The address and key in the `leaderboard` part of `src/config/event.ts` are meant to be public. **Never paste the secret / service_role key anywhere in this project.** Fill in `prize` and `closes` in the same place when you know them.
+It runs on a free Supabase project called `cheo-leaderboard` (Canada region). It's already set up and connected. The address and key in the `leaderboard` part of `src/config/event.ts` are fine to be public, but never paste the secret or service_role key anywhere in this project. Fill in `prize` and `closes` there too once we know them.
 
-If you ever need to rebuild it in a new Supabase project: open **SQL Editor**, paste in everything from `supabase/leaderboard.sql`, run it, then copy the **Project URL** and the **publishable** key from **Project Settings > API** into the config.
+If you ever have to rebuild it in a new Supabase project, open the SQL Editor, paste in all of `supabase/leaderboard.sql` and run it. Then copy the Project URL and the publishable key from Project Settings > API into the config.
 
-Knowing who is who:
+### Figuring out who's who
 
-- Every phone that posts a score gets a six-character **claim code**. The player sees it under the leaderboard; the public never does.
-- Players can also type a **homeroom**. It is optional and private.
-- To check a finalist: Supabase dashboard > Table Editor > `scores`, find their row, and ask them to show the same claim code on their phone. The homeroom column helps you find them before the event.
-Catching cheaters and bots:
+Every phone that posts a score gets a six-character claim code. The player sees it under the leaderboard, but it never shows up publicly. Players can also type their homeroom if they want, and that stays private too.
 
-- A score only counts if the database saw that round start about a minute earlier, and each round can be used once. Someone sending fake scores has to wait a minute per attempt.
-- Some posts are **flagged**: the sender is told it worked, but the row never shows on the board. This happens when the score is higher than a person can reach, doesn't match the number of cups landed, comes from a bot that filled in a hidden form field, or one phone posts more than five times in ten minutes.
-- To see them: Table Editor > `scores`, and look at the `flagged` and `flag_reason` columns. Their claim code and homeroom are in the same row.
-- **Hide a rude name:** set `flagged` to true on that row. **Un-hide a score you believe is real:** set it to false.
-- None of this makes a browser game cheat-proof. A determined person can still fake a believable score, which is why the prize is decided live.
+To check a finalist, go to the Supabase dashboard > Table Editor > `scores`, find their row, and ask them to show you the same claim code on their phone. The homeroom column makes it easier to track them down before the event.
 
-Security headers:
+### Cheaters and bots
 
-- `vercel.json` tells browsers to only run this site's own code, only talk to the leaderboard database, and never show the site inside another page. `npm run preview` uses the same rules, so test there before deploying.
-- If you move to a different Supabase project, change the address in `vercel.json` as well as in the config file, or the leaderboard will be blocked.
+A score only counts if the database saw that round start about a minute before, and each round can only be used once. So someone sending fake scores has to wait a minute for every try.
 
-Looking after it:
+Some posts get flagged. The person is told it worked, but their row never shows up on the board. That happens when the score is higher than anyone could actually get, when it doesn't match the number of cups landed, when a bot fills in a hidden form field, or when one phone posts more than five times in ten minutes. You can see flagged posts in Table Editor > `scores` under the `flagged` and `flag_reason` columns, along with their claim code and homeroom.
 
-- **Remove a name:** Supabase dashboard > Table Editor > `scores` > tick the row > Delete. There is a bad-word filter, but someone will find a way around it, so check the board now and then.
-- **Close it:** set `supabaseUrl` back to `null` and push. Take a screenshot of the top 5 first.
-- **What it stores:** the name typed, the score, the time, the optional homeroom, the claim code and the number of cups landed. Nothing else, and nothing about people who only visit. Tell your teacher the site now stores student-chosen names, since that is a change from "collects nothing".
-- Free Supabase projects pause after about a week with no activity. If the board stops loading, open the dashboard and un-pause the project.
+To hide a rude name, set `flagged` to true on that row. If a flagged score looks legit, set it back to false.
 
-### CHEO logo
+None of this makes the game impossible to cheat. Someone who really wants to can still fake a believable score, which is why the prize gets decided live.
 
-The site does not use CHEO's logo. Don't add one until CHEO has given permission in writing. The folder `public/cheo/` is where an approved file would go.
+### Security headers
 
-### The share image
+`vercel.json` tells browsers to only run the site's own code, only talk to the leaderboard database, and never load the site inside another page. `npm run preview` uses the same rules, so test there before pushing.
 
-`public/og-image.png` is the picture that appears when the link is posted or texted. If the event name or tagline changes, remake it by following the note at the top of `tools/og-template.html`.
+If we ever switch to a different Supabase project, the address has to be changed in `vercel.json` and in the config file. Otherwise the leaderboard gets blocked.
 
-## Deploy on Vercel (free)
+### Keeping an eye on it
 
-1. Make a free account at [github.com](https://github.com) and create a new empty repository.
-2. In this folder, run:
-   ```
-   git add .
-   git commit -m "First version"
-   git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO.git
-   git push -u origin main
-   ```
-3. Go to [vercel.com](https://vercel.com), sign up with your GitHub account, and click **Add New > Project**.
-4. Pick the repository. Vercel detects Vite by itself. Leave the settings as they are (build command `npm run build`, output folder `dist`) and click **Deploy**.
-5. When it finishes, Vercel gives you an address like `your-project.vercel.app`. Put that address in `siteUrl` in the config file and push again, so link previews and the Share button use it.
+To remove a name, go to the Supabase dashboard > Table Editor > `scores`, tick the row and delete it. There's a bad-word filter, but someone will get around it eventually, so check the board every so often.
 
-After that, every push to `main` updates the live site.
+To close the leaderboard, set `supabaseUrl` back to `null` and push. Screenshot the top 5 first.
 
-## Run it on your own computer
+For each score it saves the name, the score, the time, the homeroom (if they gave one), the claim code and how many cups they landed. It doesn't save anything about people who just visit the site. Make sure the teacher knows the site stores names that students type in.
+
+Free Supabase projects pause after about a week of no activity. If the board stops loading, open the dashboard and unpause it.
+
+## CHEO logo
+
+The site doesn't use CHEO's logo, and we shouldn't add it until CHEO says yes in writing. If they do, the file goes in `public/cheo/`.
+
+## The share image
+
+`public/og-image.png` is the picture that shows up when someone posts or texts the link. If the event name or tagline changes, remake it using the note at the top of `tools/og-template.html`.
+
+## Hosting
+
+The site is hosted on Vercel and connected to this GitHub repo, so every push to `main` goes live in about a minute. You don't have to do anything else.
+
+If it ever needs to be set up again from scratch: sign in to [vercel.com](https://vercel.com) with GitHub, click Add New > Project, pick this repo and hit Deploy. The build settings are already in `vercel.json`. If the address changes, update `siteUrl` in the config so link previews still work.
+
+## Running it on your own computer
 
 You need [Node.js](https://nodejs.org) 20 or newer.
 
 ```
 npm install
 npm run dev       # live preview while you edit
-npm run build     # makes the final site in dist/
+npm run build     # builds the final site into dist/
 npm run preview   # serves the built site at http://localhost:4173
 ```
 
 ## How it's built
 
-- Vite, React and TypeScript.
-- The hero cup pyramid uses three.js through react-three-fiber, with Rapier for physics. It loads after the rest of the page, and only on phones that can handle it.
-- If the phone is weak, on data saver, has no WebGL, or has "reduce motion" turned on, the site shows an illustration of the pyramid and turns off the looping animations.
-- Add `?3d=off` or `?3d=on` to the address to force the illustration or the 3D scene when testing.
-- The mini-game is a plain canvas. The best score is kept in the browser's local storage and nowhere else.
+It's Vite, React and TypeScript. The cup pyramid at the top uses three.js through react-three-fiber, with Rapier for the physics. It loads after the rest of the page, and only on phones that can handle it. On a weak phone, on data saver, with no WebGL or with "reduce motion" turned on, you get a drawing of the pyramid instead and the looping animations stop. To force one or the other while testing, add `?3d=off` or `?3d=on` to the address.
+
+The mini-game is just a canvas. Your best score is saved in your browser and nowhere else.
 
 ```
 src/config/event.ts   all the content

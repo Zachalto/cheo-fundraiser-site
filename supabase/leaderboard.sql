@@ -25,7 +25,7 @@
 
 create schema if not exists private;
 
--- ── Rounds ─────────────────────────────────────────────────
+-- Rounds
 create table if not exists public.rounds (
   id uuid primary key,
   started_at timestamptz not null default now(),
@@ -67,7 +67,7 @@ create or replace trigger rounds_guard
   before insert on public.rounds
   for each row execute function private.rounds_guard();
 
--- ── Scores ─────────────────────────────────────────────────
+-- Scores
 create table if not exists public.scores (
   id bigint generated always as identity primary key,
   name text not null
